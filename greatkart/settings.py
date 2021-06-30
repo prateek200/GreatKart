@@ -124,3 +124,8 @@ STATIC_ROOT = BASE_DIR /'static'
 STATICFILES_DIRS = [
     'greatkart/static',
 ]
+
+# Media Files config
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR /'media'
