@@ -38,6 +38,8 @@
                 </button>
                 <div class="dropdown-menu">
 
+                    <a class="dropdown-item" href="{% url 'store' %}">All Product</a>
+                    
                     {% for category in links  %}
 
                     <a class="dropdown-item" href="{{ category.get_url }}">{{  category.category_name }}</a>
