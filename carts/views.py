@@ -1,7 +1,7 @@
 from django.core.exceptions import ObjectDoesNotExist
 from django.http.request import HttpRequest
 from django.http.response import HttpResponse
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 from store.models import Product
 from .models import Cart,CartItem
 # Create your views here.
@@ -38,8 +38,36 @@ def add_cart(request,product_id):
     return redirect('cart')
 
 
+def remove_cart(request,product_id):
+
+    product=  get_object_or_404(Product,id=product_id)
+    cart = Cart.objects.get(cart_id = _cart_id(request))
+
+    cart_item = CartItem.objects.get(product = product , cart = cart)
+
+    if(cart_item.quantity > 1):
+        cart_item.quantity -= 1
+        cart_item.save()
+    else:
+        cart_item.delete()
+    
+    return redirect('cart')
+
+def remove_cart_item(request,product_id):
+
+    product=  get_object_or_404(Product,id=product_id)
+    cart = Cart.objects.get(cart_id = _cart_id(request))
+
+    cart_item = CartItem.objects.get(product = product , cart = cart)
+    cart_item.delete()
+    
+    return redirect('cart')
+
+
 def cart(request, total = 0, quantity = 0, cart_items = None):
 
+    tax = grand_total = 0
+    
     try:
         cart = Cart.objects.get(cart_id = _cart_id(request))
         cart_items =CartItem.objects.filter( cart= cart ,is_active = True)
@@ -47,6 +75,9 @@ def cart(request, total = 0, quantity = 0, cart_items = None):
         for cart_item in cart_items:
             total += cart_item.quantity * cart_item.product.price
             quantity += cart_item.product.price
+
+            tax = round(total*0.2,2)
+            grand_total = total - tax
     
     except ObjectDoesNotExist:
         pass
@@ -55,5 +86,7 @@ def cart(request, total = 0, quantity = 0, cart_items = None):
         "total": total, 
         "quantity" : quantity, 
         "cart_items" : cart_items,
+        "tax":tax, 
+        "grand_total":grand_total,
     }
     return render(request,'store/cart.html' , context)
